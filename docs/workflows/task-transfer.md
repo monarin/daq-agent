@@ -1,5 +1,8 @@
 # Transfer a report investigation to OpenCode or Claude
 
+Status: deprecated compatibility workflow. New investigations should use
+[agent report resources](report-resource.md) in an independent agent session.
+
 Status: implemented. Ordinary `daq-agent chat` still runs bounded,
 validated question/answer turns. A task transfer opens a separate persistent
 OpenCode investigation with the same report evidence and pinned diagnostic skills.

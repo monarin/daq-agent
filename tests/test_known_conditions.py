@@ -136,6 +136,11 @@ class KnownConditionTests(unittest.TestCase):
         output = self.root / 'supplied-known'
         generate_report(self.settings, self.start, self.end, output, logs=[path])
         self.assertEqual(load_report(output).manifest['generation_statistics']['model_sessions_completed'], 0)
+        resource = json.loads((output / 'agent-resource/report.json').read_text())
+        self.assertEqual(resource['diagnostic_skills']['provenance']['status'], 'not_required_no_model')
+        self.assertEqual(resource['coverage']['generation_statistics']['model_sessions_completed'], 0)
+        appendix = next(s for s in resource['sources'] if s.get('kind') == 'known-condition-summary')
+        self.assertIn('double free', (output / 'agent-resource' / appendix['path']).read_text())
         prepared = self.root / 'prepared'
         generate_report(self.settings, self.start, self.end, prepared, logs=[path], prepare_only=True)
         self.assertEqual(json.loads((prepared / 'manifest.json').read_text())['status'], 'prepared_only')

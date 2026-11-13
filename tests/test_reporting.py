@@ -186,6 +186,10 @@ class ReportingTests(unittest.TestCase):
             result = generate_report(self.fake_settings(), self.start, self.end, output)
         self.assertEqual(analyze.call_count, 1)
         self.assertEqual(result["status"], "completed")
+        resource = json.loads((output / 'agent-resource/report.json').read_text())
+        self.assertEqual(resource['hutch'], 'tmo')
+        self.assertEqual(resource['coverage']['generation_statistics']['launch_groups'], 2)
+        self.assertTrue(resource['reporting_contracts'])
         manifest = json.loads((output / "manifest.json").read_text())
         self.assertEqual(manifest["runtime_audit"]["sources_read"], ["log-1", "log-2", "log-3"])
         for name in ("report.md", "report.html"):
@@ -204,6 +208,17 @@ class ReportingTests(unittest.TestCase):
         self.assertEqual(manifest["status"], "failed")
         self.assertTrue((output / manifest["collection"]).is_file())
         self.assertFalse((output / "report.html").exists())
+
+    def test_resource_failure_prevents_completed_report_publication(self):
+        self.log()
+        output = self.root / 'report'
+        with patch('daq_agent.report_resource.write_report_resource', side_effect=ValueError('synthetic export failure')):
+            with self.assertRaisesRegex(ValueError, 'synthetic export failure'):
+                generate_report(self.fake_settings(), self.start, self.end, output)
+        manifest = json.loads((output / 'manifest.json').read_text())
+        self.assertEqual(manifest['status'], 'failed')
+        self.assertTrue((output / 'evidence/log-1.txt').is_file())
+        self.assertFalse((output / 'agent-resource').exists())
 
     def test_packaged_profile_cli_prepares_without_credentials_or_checkout(self):
         self.log()

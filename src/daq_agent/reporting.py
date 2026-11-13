@@ -176,10 +176,16 @@ def generate_report(settings, start, end, output: Path, *, logs=None, synthetic=
             write_html_bundle(output, findings, manifest)
             manifest["completed_at"] = datetime.now(timezone.utc).isoformat()
             manifest["status"] = "completed"
+            from .report_resource import write_report_resource
+            manifest['agent_resource'] = 'agent-resource/report.json'
+            write_report_resource(output, manifest, findings, output / 'agent-resource')
     except BaseException as error:
         manifest["status"] = "failed"
         manifest["failure_type"] = type(error).__name__
         raise
     finally:
         write_json(output / "manifest.json", manifest)
-    return {"status": "prepared_only" if prepare_only else "completed", "output": str(output)}
+    result = {"status": "prepared_only" if prepare_only else "completed", "output": str(output)}
+    if not prepare_only:
+        result['agent_resource'] = str(output / 'agent-resource/report.json')
+    return result

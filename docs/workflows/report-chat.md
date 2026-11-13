@@ -1,5 +1,8 @@
 # Chat with a saved report
 
+Status: deprecated compatibility workflow. New investigations should use
+[agent report resources](report-resource.md) in an independent agent session.
+
 Status: terminal chat implemented in 0.7.0; local notes added in 0.8.0. Generate a report first, then
 ask questions about its retained findings and evidence:
 
