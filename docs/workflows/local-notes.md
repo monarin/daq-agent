@@ -1,6 +1,10 @@
 # Local investigation notes
 
-Status: implemented in 0.8.0. In `daq-agent chat`, save a note using either a slash
+Status: deprecated chat compatibility feature, implemented in 0.8.0. New
+investigations should use [agent report resources](report-resource.md) in an
+independent agent session.
+
+In existing `daq-agent chat` sessions, save a note using either a slash
 command or a direct natural-language request. These operations are local and make
 no model calls:
 

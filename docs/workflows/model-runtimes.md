@@ -1,7 +1,9 @@
 # Model runtimes
 
-Status: implemented. `report`, `chat`, and `task-transfer` support OpenCode and
-Claude Code. The packaged TMO profile defaults to the centralized LCLS Claude deployment,
+Status: report runtimes implemented. `chat` and `task-transfer` are deprecated
+compatibility paths; use [agent report resources](report-resource.md) for new
+investigations. All three commands support OpenCode and Claude Code.
+The packaged TMO profile defaults to the centralized LCLS Claude deployment,
 Opus 5.5 through the `opus` mapping, medium effort, and one-hour prompt caching. `config`, `plan-report`,
 `view`, `sync-skills`, chat navigation, and local note commands do not call a model.
 

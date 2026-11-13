@@ -5,9 +5,11 @@ diagnostic skills and references. Completed reports must provide human-readable
 Markdown/HTML and a portable resource that an independent agent can investigate
 without daq-agent chat, provider credentials, the original cache or original logs.
 
-Review changes against baseline commit
-`45af495502848e75efccf1d4dd43436596cb63a4` (draft PR #8). The implementation is
-proposed as a separate stacked draft PR; no merge or deployment is included.
+The initial review used baseline commit
+`45af495502848e75efccf1d4dd43436596cb63a4`, then draft PR #8. After #8 merged,
+the user requested a fresh review of PR #9 against `main` at
+`f8f2e40a80dcba9b87044512ce349de73e91b78f`. PR #9 is open for review; no merge
+or deployment is included in this review task.
 Codex coordinates implementation and fixes; Claude independently reviews a clean
 detached checkout with read-only tools. Maximum: three review rounds, each with
 a 15-minute timeout. Review must cover the latest implementation commit.

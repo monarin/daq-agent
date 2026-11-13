@@ -219,6 +219,7 @@ class ReportingTests(unittest.TestCase):
         manifest = json.loads((output / 'manifest.json').read_text())
         self.assertEqual(manifest['status'], 'failed')
         self.assertNotIn('agent_resource', manifest)
+        self.assertNotIn('completed_at', manifest)
         self.assertTrue((output / 'evidence/log-1.txt').is_file())
         self.assertFalse((output / 'agent-resource').exists())
 

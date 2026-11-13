@@ -57,7 +57,25 @@ inspected source and the supplied evidence with read-only tools; it did not
 execute tests itself. No live DAQ or diagnostic-quality model evaluation was
 performed, and the review does not claim either.
 
-Draft PR: [#9](https://github.com/monarin/daq-agent/pull/9), stacked on draft
-[#8](https://github.com/monarin/daq-agent/pull/8). Chat/task-transfer remain
+At the time of that review, draft [#9](https://github.com/monarin/daq-agent/pull/9)
+was stacked on draft [#8](https://github.com/monarin/daq-agent/pull/8). Chat/task-transfer remain
 temporarily deprecated; UED onboarding remains proposed. No merge, deployment
 or active-environment installation is included.
+
+## Fresh PR review after #8 merged — round 1
+
+The user requested a new review loop after #9 was retargeted to `main`.
+Reviewed head: `d5d6f6bb342539702c1b8016c08f4a41cad7052e`.
+Base: `f8f2e40a80dcba9b87044512ce349de73e91b78f`.
+Verdict: **pass**, with two low, non-blocking follow-ups. The full diff and
+fresh installed-wheel validation were supplied inline; this was a full review,
+not only confirmation of the prior review fixes. The 172-test offline suite
+passed with no skips, including the opt-in OpenCode tool test. Existing exact-head
+package checks and GitHub CI on Python 3.11/3.13 were also supplied.
+
+| ID | Finding | Response prepared for re-review |
+| --- | --- | --- |
+| P9-R1 | Model-runtime and local-note documentation omitted the chat deprecation context | Accepted: add resource-workflow pointers and update the documentation index statuses. |
+| P9-R2 | Failed resource generation retained a completion timestamp | Accepted: remove `completed_at` together with `agent_resource` on failure and extend the publication-failure regression test. |
+
+The corrected implementation will be re-reviewed before this new loop concludes.

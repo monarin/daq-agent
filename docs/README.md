@@ -16,9 +16,9 @@ proposals, implementation plans, and project decisions.
 | [Reporting MVP](proposals/001-reporting-mvp.md) | First useful report and CLI contract | Partial: planning and shared-log reports implemented |
 | [Agent report resources](workflows/report-resource.md) | Portable findings, evidence and pinned guidance for independent agents | Implemented |
 | [Report chat](workflows/report-chat.md) | Ask cited follow-up questions about a saved report | Deprecated compatibility |
-| [Local notes](workflows/local-notes.md) | Private hutch-scoped notes reused across chats/reports | Implemented |
+| [Local notes](workflows/local-notes.md) | Private hutch-scoped notes reused across chats/reports | Deprecated chat compatibility |
 | [Task transfer](workflows/task-transfer.md) | Legacy chat-based investigation launch | Deprecated compatibility |
-| [Model runtimes](workflows/model-runtimes.md) | Select OpenCode or Claude for reports, chat and investigations | Implemented |
+| [Model runtimes](workflows/model-runtimes.md) | Select OpenCode or Claude for reports, chat and investigations | Reports implemented; chat/transfers deprecated |
 | [Chat design](proposals/003-report-chat.md) | Accepted design and future extensions | First terminal implementation complete |
 | [Live troubleshooting](proposals/002-live-troubleshooting.md) | Watcher and incident-driven investigations | Future proposal |
 | [Evaluation](evaluation.md) | Code tests and diagnostic-quality evaluation | Initial strategy |
