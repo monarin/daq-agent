@@ -26,6 +26,10 @@ NAME = re.compile(r"(\d{2}_\d{2}:\d{2}:\d{2})_.+\.log(?:\.zst)?$")
 STAMP = re.compile(r"^(\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d)(?:[.,]\d+)?(Z|[+-]\d\d:\d\d)?")
 BUCKETS = ("inside", "inside_if_local", "untimed_or_unparsed", "outside", "outside_if_local")
 PATTERNS = {
+    # Keep detector evidence ahead of broad errors in the bounded context budget.
+    # These are message signatures, not diagnoses or inferred payload thresholds.
+    "detector_subframe": r"\bMissing\s+data:\s*subframe(?:\s+count\b|\[\d+\])",
+    "adc_calibration": r"\bAxiVersion\.GitHash\s*=\s*\S+\s*!=\s*Calibration\s+Githash\s*=\s*\S+|\bPlease\s+re-train\s+the\s+ADC\s+lanes\b",
     "transition_failure": r"did not respond to|Phase [0-9]+ error|Failed to configure|configure failed|failed to (?:alloc|connect|enable)",
     "traceback_or_fatal": r"Traceback \(most recent call last\)|Segmentation fault|core dumped|terminate called|\bFATAL\b",
     "memory_error": r"double free|corrupted (?:size|double-linked)|invalid pointer|out of memory",
@@ -45,7 +49,7 @@ PATTERNS = {
 }
 COMPILED = {name: re.compile(pattern, re.I) for name, pattern in PATTERNS.items()}
 PRIORITY = list(PATTERNS)
-PRIORITY.insert(8, "slow_link_config")
+PRIORITY.insert(PRIORITY.index("pv_read") + 1, "slow_link_config")
 SENSITIVE = re.compile(r"(?:CONFIGDB_AUTH|Authorization|password|secret|access_token|api_key|bearer)\s*[:=]|https?://[^/\s]+:[^/\s]+@|eyJ[A-Za-z0-9_-]{20,}\.", re.I)
 
 
@@ -196,8 +200,10 @@ def collect_logs(root: Path, target: Path, hutch: str, start, end, timezone_name
                     continue
                 normalized = STAMP.sub("", safe(line)).strip()
                 normalized = re.sub(r"0x[0-9a-fA-F]+", "0xADDR", normalized)
-                normalized = re.sub(r"\[\d+\]", "[PID]", normalized)
-                normalized = re.sub(r"\b\d{5,}\b", "N", normalized)[:240]
+                if "detector_subframe" not in categories:
+                    normalized = re.sub(r"\[\d+\]", "[PID]", normalized)
+                    normalized = re.sub(r"\b\d{5,}\b", "N", normalized)
+                normalized = normalized[:240]
                 group["patterns"][(bucket, normalized)] += 1
                 for category in categories:
                     analysis_counts[(category, bucket)] += 1

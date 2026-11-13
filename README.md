@@ -101,9 +101,10 @@ daq-agent report --hutch ued --last 1h --prepare-only
 
 This retains evidence and skills without calling a model or producing a completed
 report. Pacific time is an assumed source timezone; verify it for the selected
-logs or supply an external `--config` with the correct timezone. Detector-specific
-pattern selection and richer UED guidance remain follow-up work, so collection
-success does not establish diagnostic quality or detector health.
+logs or supply an external `--config` with the correct timezone. Collection now
+selects bare subframe and ADC-calibration messages with bounded context. Richer
+UED guidance remains follow-up work; collection success does not establish
+diagnostic quality or detector health.
 
 For model-backed reporting, omit `--prepare-only`; completed reports provide
 Markdown/HTML and `agent-resource/report.json`. Use `daq-agent view --hutch ued`

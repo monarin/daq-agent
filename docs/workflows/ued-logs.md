@@ -1,6 +1,6 @@
 # UED profile and evidence preparation
 
-Status: initial settings implemented. This enables the generic historical
+Status: initial settings and detector-message selection implemented. This enables the generic historical
 reporting workflow for UED; it does not validate detector diagnosis.
 
 The packaged `ued` profile and `config/hutches/ued.toml` contain matching settings:
@@ -43,10 +43,36 @@ Completed reports contain `report.md`, `report.html` and
 agent. `daq-agent view --hutch ued` selects the latest completed UED report.
 Model-backed generation may incur usage charges and requires human review.
 
-No TMO known-condition exclusions are inherited. Current selection can still
-miss bare ePixQuad1kfps subframe and ADC-calibration messages without a generic
-error prefix or nearby selected context. Detector-specific patterns, synthetic
-diagnostic fixtures and reviewed upstream detector guidance remain separate
-work in the [UED roadmap](../proposals/008-ued-support.md). Successful collection
-does not establish complete evidence coverage, detector health, diagnostic
-quality or live DAQ state. No production control operations are introduced.
+No TMO known-condition exclusions are inherited. Automatic collection now selects
+bare messages in two narrow categories, even without an error severity prefix:
+
+| Category | Message signatures |
+| --- | --- |
+| `detector_subframe` | `Missing data: subframe count ...`, `Missing data: subframe[N] ...` (including zero timing/meta size and zero/short image payload messages) |
+| `adc_calibration` | `AxiVersion.GitHash = ... != Calibration Githash = ...`, `Please re-train the ADC lanes` |
+
+These signatures apply to any hutch that emits them. They record messages, not
+hardware checks or diagnoses; no expected payload size is inferred. Healthy
+AsicMask assignments, equal hash messages and ordinary subframe size logs do not
+trigger these categories. Existing generic patterns still apply.
+
+Detector categories receive representative context before broader errors within
+the existing document budget. Subframe indices and numeric sizes remain distinct
+for sampling. At most four distinct signatures per category/time bucket are
+retained; additional matches remain in counts. Context includes two preceding
+and three following lines; existing traceback capture retains up to 64 lines.
+Nearby timing, frame and setup messages can therefore remain context without
+being counted as failures themselves. No distant configuration search is claimed.
+Source launch/component/platform/release, line numbers and time buckets remain
+in evidence; sensitive fields are masked using the existing limited rules.
+Budget omissions and clipping remain explicit. Many distinct detector messages
+or large inventories can still exhaust the bounded evidence budget.
+
+Synthetic regression tests cover bare signatures, healthy near matches, multiple
+control/TEB/detector launches and platforms, configuration-verification tracebacks,
+redaction, noisy-log sampling, and retention in completed report resources using
+a fake runtime. They do not evaluate model diagnostic quality. Richer reviewed
+upstream detector guidance remains the next step in the
+[UED roadmap](../proposals/008-ued-support.md). Successful collection does not
+establish complete evidence coverage, detector health or live DAQ state. No
+production control operations are introduced.
