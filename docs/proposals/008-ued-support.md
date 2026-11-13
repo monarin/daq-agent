@@ -1,9 +1,10 @@
 # UED reporting support
 
-Status: initial profile milestone implemented 2026-11-13; detector evidence
-selection and richer upstream guidance remain proposed. See [UED settings](../workflows/ued-logs.md)
+Status: initial profile and detector evidence selection implemented 2026-11-13;
+richer upstream guidance remains proposed. See [UED settings](../workflows/ued-logs.md)
 for the implemented scope and [review scope](../reviews/ued-profile/scope.md)
-for acceptance checks. Source timezone confirmation remains open.
+for profile acceptance checks. The [detector evidence scope](../reviews/ued-evidence/scope.md)
+covers the next milestone. Source timezone confirmation remains open.
 
 ## Scope and findings
 
@@ -48,20 +49,22 @@ An explicit UED config can exercise the generic code before packaging defaults.
 
 ## Evidence and diagnostic gaps
 
-Direct checks against the current collector regexes found no category matches
-for these synthetic bare messages:
+The initial assessment found no category matches for these synthetic bare
+messages; the collector now selects them directly:
 
 - `Missing data: subframe count 3 [expected 4]`
 - `Missing data: subframe[2] size 0`
 - `AxiVersion.GitHash = abc != Calibration Githash = def`
 - `Please re-train the ADC lanes`
 
-A severity marker or adjacent selected context may capture these messages, but
-the message itself is insufficient today. Add narrow signatures for spaced
-“Missing data”/subframes and ADC calibration mismatch. Preserve associated
-configuration verification tracebacks, frame-size and timing context. An
-ordinary `Setting ... AsicMask ...` line is context, not a failure by itself.
-Test that sampling still retains detector evidence amid repeated generic errors.
+Implemented: dedicated `detector_subframe` and `adc_calibration` categories select
+these messages without severity prefixes. Bounded representative contexts prioritize
+these categories before broad errors, preserving subframe index/size distinctions.
+Synthetic tests cover adjacent frame/timing context, configuration-verification
+tracebacks, ordinary AsicMask setup as non-failure, launch identity, time buckets,
+redaction and sampling amid repeated generic errors. The existing four-signature,
+context and document bounds still apply; this does not guarantee every symptom
+will appear in model inputs. See [implemented behavior](../workflows/ued-logs.md).
 
 Upstream guidance should distinguish missing timing subframes, zero versus
 short image payloads, ADC startup/calibration problems, AsicMask verification,
@@ -84,9 +87,9 @@ relevant guidance using its own context management.
    and pinned general skill integration. Verify log access as the actual runtime
    account and verify the filename/line timezone assumption. Keep missing
    coverage explicit. Basic reporting can ship separately from richer diagnosis.
-2. Add synthetic UED launch groups and the missing evidence signatures. Cover
-   control/TEB/DRP correlation, multiple launches/platforms, untimed lines,
-   normal AsicMask setup, and detector symptoms without generic error prefixes.
+2. Implemented detector evidence signatures and synthetic UED launch groups:
+   control/TEB/DRP identity, multiple launches/platforms, untimed lines, normal
+   AsicMask setup, and bare detector symptoms. Model-backed evaluation remains open.
 3. Review and pin upstream UED diagnostic guidance. Check retained skill sizes,
    immutable skill provenance and application tool restrictions across reporting
    and resource export.
