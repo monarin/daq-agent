@@ -34,8 +34,8 @@ the reviewer did not run commands or inspect production logs.
   and control/TEB/detector identities, platforms/releases, explicit/conditional/
   untimed buckets, original line numbers, traceback context, sensitive-field
   masking, noisy-log budget omissions and preserved detector values.
-- A fake-runtime completed report preserves detector evidence in human report
-  output artifacts and hashed portable-resource sources. This tests plumbing
+- A fake-runtime completed report produces human-readable output artifacts and
+  preserves detector evidence in hashed portable-resource sources. This tests plumbing
   and retention, not model interpretation or diagnostic quality.
 - `git diff --check` passed. No profile, dependency or package-data changes.
   No production reads/operations or diagnostic model calls were used.
