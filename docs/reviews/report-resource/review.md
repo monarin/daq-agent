@@ -78,4 +78,22 @@ package checks and GitHub CI on Python 3.11/3.13 were also supplied.
 | P9-R1 | Model-runtime and local-note documentation omitted the chat deprecation context | Accepted: add resource-workflow pointers and update the documentation index statuses. |
 | P9-R2 | Failed resource generation retained a completion timestamp | Accepted: remove `completed_at` together with `agent_resource` on failure and extend the publication-failure regression test. |
 
-The corrected implementation will be re-reviewed before this new loop concludes.
+## Fresh PR review after #8 merged — round 2 passed
+
+Reviewed code commit: `ffea056310cb9d3827d9f6890aa0981947b400ed`.
+Verdict: **pass**, zero remaining findings. Claude confirmed both P9-R1 and
+P9-R2 were resolved with no regressions. This concludes the fresh two-round loop;
+the PR remains open and unmerged.
+
+The exact-source offline suite passed all **172 tests with no skips**, including
+the real offline OpenCode tool test. GitHub CI on the corrected commit also
+passed on Python 3.11 and 3.13, including wheel build/install and unit tests.
+The earlier installed-wheel, outside-checkout export and package-data checks
+remain recorded above; no packaging inputs changed in this correction.
+
+The reviewer used read-only tools and coordinator-supplied inline evidence; it
+did not execute tests. Its context was prepared before the corrected commit's
+CI finished, so its recorded CI limitation was subsequently resolved by the
+successful run. No live DAQ or diagnostic-quality evaluation was performed.
+This final review-record update is documentation only and does not change the
+reviewed implementation.
