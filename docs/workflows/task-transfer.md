@@ -3,7 +3,7 @@
 Status: deprecated compatibility workflow. New investigations should use
 [agent report resources](report-resource.md) in an independent agent session.
 
-Status: implemented. Ordinary `daq-agent chat` still runs bounded,
+For existing sessions, `daq-agent chat` still runs bounded,
 validated question/answer turns. A task transfer opens a separate persistent
 OpenCode investigation with the same report evidence and pinned diagnostic skills.
 Claude Code is also supported. A transfer inherits the chat's selected runtime;

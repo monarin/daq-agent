@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 
-from .artifacts import write_json, write_private
+from .artifacts import write_json
 from .investigation_evidence import with_known_conditions
 from .report_skills import retained_skills
 from .report_store import Report, load_report, read_artifact
@@ -82,21 +82,26 @@ def write_report_resource(directory: Path, manifest: dict, findings: dict, targe
         report = with_known_conditions(report, staging)
         sources, inventory = [], []
 
-        def save(name, raw):
+        def save(name, raw, expected=None):
             path = staging / name
             path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-            write_private(path, raw.decode('utf-8'))
+            path.write_bytes(raw)
+            path.chmod(0o600)
             record = _record(name, path.read_bytes())
+            expected = expected if expected is not None else _record(name, raw)
+            if any(record[key] != expected[key] for key in ('sha256', 'bytes')):
+                raise ValueError('resource copy integrity check failed')
             inventory.append(record)
             return record
 
         for source in report.manifest['sources']:
             name = (f"known-conditions/{source['id']}.txt" if source.get('kind') == 'known-condition-summary'
                     else f"evidence/{source['id']}.txt")
-            record = save(name, report.raw_evidence[source['id']])
+            record = save(name, report.raw_evidence[source['id']], source)
             sources.append({**record, **{key: source[key] for key in
                             ('id', 'lines', 'original_path', 'kind', 'rule_id') if key in source}})
-        skill_files = [save(f'skills/{name}', raw) for name, raw in sorted(skills.items())]
+        skill_files = [save(f'skills/{name}', raw, provenance['files'][name])
+                       for name, raw in sorted(skills.items())]
         contracts = []
         children = [(directory, manifest)]
         if manifest['schema_version'] == 2:
@@ -145,10 +150,20 @@ def write_report_resource(directory: Path, manifest: dict, findings: dict, targe
         save('README.md', GUIDE.encode())
         resource['artifacts'] = inventory
         write_json(staging / 'report.json', resource)
-        # rename publishes only a fully assembled bundle; never replace an export.
-        if target.exists() or target.is_symlink():
-            raise FileExistsError(f'resource destination already exists: {target}')
-        staging.rename(target)
+        # Claim the destination atomically, so concurrent exporters cannot replace
+        # another writer's empty directory. Publish over only our own reservation.
+        target.mkdir(mode=0o700)
+        reservation = target.stat()
+        try:
+            staging.rename(target)
+        except BaseException:
+            try:
+                current = target.lstat()
+                if (current.st_dev, current.st_ino) == (reservation.st_dev, reservation.st_ino):
+                    target.rmdir()  # Never remove files added by another writer.
+            except OSError:
+                pass
+            raise
     return target / 'report.json'
 
 

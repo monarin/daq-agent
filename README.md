@@ -176,6 +176,9 @@ For an older completed report, create the resource without a model call:
 daq-agent export-resource /path/to/report --output /path/to/new-resource
 ```
 
+Reports predating retained skill provenance cannot be exported and must be
+regenerated to obtain a verified resource.
+
 The supported direction is report generation plus independent investigation.
 `chat` and `task-transfer` remain temporarily as deprecated compatibility commands.
 See [agent report resources](docs/workflows/report-resource.md) for the format,

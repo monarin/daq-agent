@@ -58,7 +58,7 @@ An available skill is not evidence that its tools are installed or reachable.
 
 | Location | Responsibility |
 | --- | --- |
-| `src/daq_agent/cli.py` | Configuration, planning, hutch reports and viewing |
+| `src/daq_agent/cli.py` | Configuration, planning, hutch reports, viewing and resource export |
 | `src/daq_agent/config.py` | Validate non-secret configuration |
 | `src/daq_agent/workflow.py` | Time-boundary validation and read-only report plans |
 | `src/daq_agent/reporting.py` | Hutch/window scope, evidence collection and session selection |

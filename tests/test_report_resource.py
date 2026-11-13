@@ -1,6 +1,6 @@
 """Offline portability and provenance checks for independent report consumers."""
 
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
 import hashlib
 import io
 import json
@@ -8,6 +8,7 @@ from pathlib import Path
 import shutil
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from chat_fixtures import write_report
 from daq_agent.cli import main
@@ -66,6 +67,67 @@ class ReportResourceTests(unittest.TestCase):
         self.assertEqual(resource['findings'][-1]['evidence'][0]['source'], 'log-9')
         self.assertEqual(len(resource['diagnostic_skills']['files']), 2)
         self.assertEqual(len(resource['model_sessions']), 2)
+
+    def test_non_ascii_evidence_and_skill_bytes_are_preserved(self):
+        report = write_report(self.root, upstream=True)
+        path = report / 'manifest.json'
+        manifest = json.loads(path.read_text())
+        evidence = 'SYNTHETIC µs\r\nERROR Δ timing\r\n日本語 context\r\n'.encode('utf-8')
+        (report / 'evidence/log-1.txt').write_bytes(evidence)
+        manifest['sources'][0].update(bytes=len(evidence), sha256=hashlib.sha256(evidence).hexdigest())
+        name = 'psana-daq/references/utf8.md'
+        raw = '# Synthetic référence\r\nΔt in µs\r\n'.encode('utf-8')
+        (report / 'upstream-skills' / name).parent.mkdir()
+        (report / 'upstream-skills' / name).write_bytes(raw)
+        manifest['upstream_skills']['files'][name] = {'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()}
+        path.write_text(json.dumps(manifest))
+        export_report_resource(report, self.root / 'export')
+        self.assertEqual((self.root / 'export/evidence/log-1.txt').read_bytes(), evidence)
+        self.assertEqual((self.root / 'export/skills' / name).read_bytes(), raw)
+
+    def test_corrupted_copy_is_rejected_before_publication(self):
+        report = write_report(self.root)
+        original = Path.write_bytes
+        def corrupt(path, raw):
+            return original(path, raw + b'changed' if path.name == 'log-1.txt' else raw)
+        with patch.object(Path, 'write_bytes', corrupt):
+            with self.assertRaisesRegex(ValueError, 'copy integrity'):
+                export_report_resource(report, self.root / 'export')
+        self.assertFalse((self.root / 'export').exists())
+
+    def test_concurrent_empty_destination_is_not_replaced(self):
+        report = write_report(self.root)
+        target = self.root / 'export'
+        original = Path.mkdir
+        raced = False
+        def competing_mkdir(path, *args, **kwargs):
+            nonlocal raced
+            if path == target and not raced:
+                raced = True
+                original(path)  # Another writer wins just before our claim.
+            return original(path, *args, **kwargs)
+        with patch.object(Path, 'mkdir', competing_mkdir):
+            with self.assertRaises(FileExistsError):
+                export_report_resource(report, target)
+        self.assertTrue(raced)
+        self.assertTrue(target.is_dir())
+        self.assertEqual(list(target.iterdir()), [])
+
+    def test_publication_failure_removes_only_empty_owned_reservation(self):
+        report = write_report(self.root)
+        target = self.root / 'export'
+        with patch.object(Path, 'rename', side_effect=OSError('synthetic publication failure')):
+            with self.assertRaisesRegex(OSError, 'publication failure'):
+                export_report_resource(report, target)
+        self.assertFalse(target.exists())
+
+    def test_compatibility_commands_print_migration_notice(self):
+        for command, mocked in ((['chat', '--question', 'synthetic'], 'daq_agent.cli.chat_report'),
+                                (['task-transfer', '/synthetic/workspace'], 'daq_agent.task_transfer.launch_transfer')):
+            with self.subTest(command=command[0]), patch(mocked, return_value=0), redirect_stderr(io.StringIO()) as stderr:
+                self.assertEqual(main(command), 0)
+            self.assertIn('Deprecated workflow', stderr.getvalue())
+            self.assertIn('export-resource', stderr.getvalue())
 
     def test_tampered_evidence_or_skills_fail_without_publishing(self):
         for name in ('evidence/log-1.txt', 'upstream-skills/psana-daq/SKILL.md'):

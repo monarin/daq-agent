@@ -181,6 +181,7 @@ def generate_report(settings, start, end, output: Path, *, logs=None, synthetic=
             write_report_resource(output, manifest, findings, output / 'agent-resource')
     except BaseException as error:
         manifest["status"] = "failed"
+        manifest.pop('agent_resource', None)
         manifest["failure_type"] = type(error).__name__
         raise
     finally:
