@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 import json
 from pathlib import Path
 import subprocess
+import sys
 
 from . import __version__
 from .chat import chat_report
@@ -70,7 +71,10 @@ def main(argv: list[str] | None = None) -> int:
     viewer.add_argument("--ssh-host", help="laptop SSH alias used in printed tunnel instructions")
     viewer.add_argument("--viewer-config", type=Path, help="personal viewer TOML configuration path")
     viewer.add_argument("--save-settings", action="store_true", help="save root, port, and SSH alias as personal defaults")
-    chat = commands.add_parser("chat", help="ask cited follow-up questions about a completed report")
+    export = commands.add_parser('export-resource', help='export a saved report for an external agent; no model call')
+    export.add_argument('run', type=Path, help='completed report directory')
+    export.add_argument('--output', required=True, type=Path, help='new standalone resource directory')
+    chat = commands.add_parser("chat", help="deprecated: use the report resource with an external agent")
     chat.add_argument("run", nargs="?", type=Path, help="completed report directory (default: latest valid report)")
     chat.add_argument("--hutch", help="select the latest completed report for this hutch")
     chat.add_argument("--root", type=Path, help="report search root; defaults to the viewer's saved preference")
@@ -86,7 +90,7 @@ def main(argv: list[str] | None = None) -> int:
     chat.add_argument("--model")
     chat.add_argument("--timeout", type=int, default=600, help="timeout per question, 1–600 seconds")
     chat.add_argument("--question", help="ask one question and exit; otherwise open an interactive conversation")
-    transfer = commands.add_parser("task-transfer", help="open a prepared private investigation")
+    transfer = commands.add_parser("task-transfer", help="deprecated: use the report resource with an external agent")
     transfer.add_argument("workspace", type=Path, help="workspace printed by chat /task-transfer")
     transfer.add_argument("--resume", action="store_true", help="continue this runtime's saved investigation")
     transfer.add_argument("--runtime", choices=("opencode", "claude"), help="override the handoff runtime (default: opencode for older handoffs)")
@@ -97,6 +101,14 @@ def main(argv: list[str] | None = None) -> int:
         command.add_argument("--claude-cache-ttl", choices=("5m", "1h"))
     args = parser.parse_args(argv)
     try:
+        if args.command == 'export-resource':
+            from .report_resource import export_report_resource
+            resource = export_report_resource(args.run, args.output)
+            print(json.dumps({'status': 'exported', 'agent_resource': str(resource)}, indent=2))
+            return 0
+        if args.command in {'chat', 'task-transfer'}:
+            print('Deprecated workflow: use agent-resource/report.json with an external agent. '
+                  'For older reports, use export-resource REPORT --output NEW_DIRECTORY.', file=sys.stderr)
         if args.command == "task-transfer":
             from .task_transfer import launch_transfer
             return launch_transfer(args.workspace, resume=args.resume, runtime=args.runtime, model=args.model)

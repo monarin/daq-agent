@@ -6,7 +6,7 @@ its actual configuration and access limits.
 
 ## Locations and ownership
 
-- Source: `slac-lcls/daq-agent`.
+- Source: personal project `monarin/daq-agent`.
 - Initial development checkout: `/sdf/home/m/monarin/daq-agent`.
 - Future service: versioned installation in a group-managed location on an
   approved host, with a named operational owner. The exact host/path is undecided.

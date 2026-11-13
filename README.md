@@ -1,16 +1,18 @@
 # DAQ Agent
 
-Experimental assistance for LCLS DAQ and AMI operations. The first milestone is
+Personal project exploring assistance for LCLS DAQ and AMI operations. The first milestone is
 an evidence-backed TMO robustness report covering an explicit historical window,
 for review by the hutch robustness monitor and the DAQ group.
 
 **Status: runnable reporting prototype.** `report` collects recent shared TMO
 logs and runs Claude Code (the TMO default) or OpenCode with pinned DAQ skills to produce one report for the
 hutch and time window. Optional `report --log` accepts supplied excerpts.
-Reports contain cited findings, Markdown, and HTML. New reports also show generation
+Reports contain cited findings, Markdown, HTML, and a portable agent resource.
+New reports also show generation
 time and coverage counts (raw log files, launch groups, evidence documents, and
-completed model sessions); numbered DAQ runs remain not determined. `chat` answers follow-up
-questions about a saved report. Grafana queries, live diagnosis, and continuous
+completed model sessions); numbered DAQ runs remain not determined. External
+agents continue investigations using the resource and its retained evidence and
+skills. Grafana queries, live diagnosis, and continuous
 monitoring remain unimplemented. `--prepare-only` makes no model calls.
 
 ## Quick start
@@ -65,12 +67,11 @@ configuration and the `--no-known-conditions` override.
 The TMO profile uses the centralized LCLS Claude binary and shared credential
 file, with Opus 5.5 through the `opus` alias, medium effort and one-hour prompt
 caching. Install the [LCLS Claude setup](https://psagents.github.io/#welcome) first.
-Reports, chat and task transfers use isolated application tools and the pinned
-DAQ skills, independently of the interactive installation's broader skills.
+Report generation uses isolated application tools and the pinned DAQ skills,
+independently of the interactive installation's broader skills.
 
 ```bash
 daq-agent report --hutch tmo --last 2d
-daq-agent chat --hutch tmo
 ```
 
 Use `--model sonnet` to select another alias. OpenCode remains available with
@@ -150,31 +151,38 @@ New analyses also produce portable HTML for offline viewing. See
 [viewing reports](docs/viewing-reports.md) for NoMachine, SSH, personal settings,
 and access details. Viewing an existing report makes no model calls.
 
-## Chat with a report
+## Use a report with an external agent
+
+Each completed `report` produces two forms of the same findings:
+
+- **Human-readable:** `report.md` and `report.html`.
+- **Agent resource:** `agent-resource/report.json`, accompanied by retained
+  evidence, pinned diagnostic skills/references and a reading guide.
+
+Give an independent agent the resource path:
+
+> Read `/path/to/report/agent-resource/README.md`, then investigate the findings
+> in `report.json` using the retained evidence and diagnostic guidance. Save your
+> conclusions separately.
+
+Copy the entire `agent-resource/` directory when moving it to another location.
+Its artifact references are relative and require no daq-agent installation,
+provider credentials or access to the original log tree. The resource includes
+private evidence and is not a sanitized public export.
+
+For an older completed report, create the resource without a model call:
 
 ```bash
-daq-agent chat --hutch tmo
+daq-agent export-resource /path/to/report --output /path/to/new-resource
 ```
 
-Chat selects the latest completed report and displays its window. Ask a question
-such as "Explain finding 3 and its evidence." Use `/findings`, `/sources`, `/report`
-and `/exit` for local navigation. `/note TEXT` or `Save this note: TEXT` saves a
-local note; `/note` saves the last answer with citations. `/notes` retrieves notes. `daq-agent chat /path/to/report` selects a
-specific report; `daq-agent chat --resume CHAT_ID` continues a saved conversation.
+Reports predating retained skill provenance cannot be exported and must be
+regenerated to obtain a verified resource.
 
-For a longer investigation, enter `/task-transfer [investigation goal]`. It prepares
-an evidence-backed handoff and opens a persistent session in the selected runtime with the report's
-pinned skills and instructions for writing a private investigation note. Use
-`/task-transfer --runtime claude [goal]` to select Claude explicitly, or `/task-transfer --prepare-only [goal]` to prepare
-without launching a model. See
-[task transfer](docs/workflows/task-transfer.md) for resume and tool boundaries.
-
-Chat reuses saved evidence and the report's pinned diagnostic skills without
-rescanning logs. Answers use the configured model service and retain citations.
-Conversations stay attached to their original report and are saved privately,
-separately from it. See [report chat](docs/workflows/report-chat.md) for context
-limits, model overrides and provenance. [Local notes](docs/workflows/local-notes.md)
-are saved under `~/daq/agent-logs/notes/<hutch>/` and can inform later chats.
+The supported direction is report generation plus independent investigation.
+`chat` and `task-transfer` remain temporarily as deprecated compatibility commands.
+See [agent report resources](docs/workflows/report-resource.md) for the format,
+provenance, limits and migration details.
 
 ## Development
 
@@ -194,10 +202,8 @@ Only reviewed synthetic or sanitized fixtures belong in `evals/`.
 - [One-command TMO reports](docs/workflows/rolling-report.md)
 - [Real TMO log analysis](docs/workflows/tmo-logs.md)
 - [Viewing reports](docs/viewing-reports.md)
-- [Chat with a report](docs/workflows/report-chat.md)
+- [Agent report resources](docs/workflows/report-resource.md)
 - [Choose OpenCode or Claude](docs/workflows/model-runtimes.md)
-- [Local investigation notes](docs/workflows/local-notes.md)
-- [Transfer an investigation to OpenCode or Claude](docs/workflows/task-transfer.md)
 - [Skills integration](docs/skills-integration.md)
 - [CLI and first reporting milestone](docs/proposals/001-reporting-mvp.md)
 - [Future live troubleshooting](docs/proposals/002-live-troubleshooting.md)

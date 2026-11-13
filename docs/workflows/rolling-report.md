@@ -168,7 +168,9 @@ validation, aggregation and initial report rendering. The measurement is capture
 before the final statistics are written into the report and manifest; that final
 publication overhead is excluded. UTC start and measurement timestamps, elapsed
 seconds and counts are saved as `generation_statistics` in `manifest.json`.
-Completion is published only after final HTML/Markdown generation succeeds.
+Completion is published only after final HTML/Markdown and the portable
+[agent resource](report-resource.md) are ready. The CLI prints the resource path
+as `agent_resource`; an independent agent can read it without built-in chat.
 
 Counts come from the retained collection inventory, not model-generated prose.
 Each captured raw file and launch group counts once, regardless of platform.

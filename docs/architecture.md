@@ -14,11 +14,26 @@ gets one draft with pinned upstream DAQ guidance, validated citation locations,
 and retained evidence. Larger evidence sets use multiple bounded sessions; Python
 combines their findings without a further model call. Cross-batch incident
 deduplication and causal synthesis remain future work.
-`chat` supports follow-up conversations bound to saved reports, with retained
-diagnostic skills, bounded context retrieval, validated citations and resume.
+Completed reports also produce a portable agent resource with findings, evidence
+and retained diagnostic guidance. Independent agents own follow-up investigation
+and session management. Built-in `chat` and `task-transfer` are deprecated
+compatibility paths; their implementation is documented below for existing users.
 Grafana integration, incident history, and a continuous service remain future
 work. See [one-command reporting](workflows/rolling-report.md) and
 [the supplied-excerpt workflow](workflows/log-analysis.md).
+
+## Report outputs
+
+The report command publishes completion only after human-readable Markdown/HTML
+and `agent-resource/report.json` with its dependencies are ready. Resource
+creation is deterministic and makes no additional model call. An external agent
+can read the copied resource directory without daq-agent or the original cache.
+The resource preserves the report's pinned guidance and separates evidence from
+interpretation; it does not configure the external agent's tools or permissions.
+See [the resource contract](workflows/report-resource.md).
+
+The 192 KiB skill ceiling belongs to the deprecated chat workflow. Export uses
+the existing upstream retention bounds and has no per-question chat budget.
 
 ## Proposed flow
 
@@ -43,7 +58,7 @@ An available skill is not evidence that its tools are installed or reachable.
 
 | Location | Responsibility |
 | --- | --- |
-| `src/daq_agent/cli.py` | Configuration, planning, hutch reports and viewing |
+| `src/daq_agent/cli.py` | Configuration, planning, hutch reports, viewing and resource export |
 | `src/daq_agent/config.py` | Validate non-secret configuration |
 | `src/daq_agent/workflow.py` | Time-boundary validation and read-only report plans |
 | `src/daq_agent/reporting.py` | Hutch/window scope, evidence collection and session selection |
@@ -59,6 +74,7 @@ An available skill is not evidence that its tools are installed or reachable.
 | `src/daq_agent/report_statistics.py` | Shared display of application-measured report timing and coverage |
 | `src/daq_agent/reports.py` | Findings schema/citation-location validation and Markdown rendering |
 | `src/daq_agent/html_reports.py` | Portable HTML reports and line-numbered evidence pages |
+| `src/daq_agent/report_resource.py` | Verify and export portable report resources for external agents |
 | `src/daq_agent/report_store.py` | Shared report loading, integrity checks and latest selection |
 | `src/daq_agent/report_skills.py` | Retained diagnostic skill verification across report batches |
 | `src/daq_agent/chat.py` | Bound conversations, per-question execution and durable resume |

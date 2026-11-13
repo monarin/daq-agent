@@ -1,7 +1,9 @@
 # Standalone Claude and Codex report investigations
 
-Status: proposed, 2026-10-20. No commands or skill installation described below
-have been implemented by this proposal.
+Status: historical proposal, 2026-10-20. The 2026-11-13 direction is
+report generation plus [portable agent resources](../workflows/report-resource.md).
+That resource/export subset is implemented; the list/inspect commands, personal
+skill installation and note import described below remain unimplemented.
 
 ## Intended experience
 

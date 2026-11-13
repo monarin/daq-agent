@@ -62,6 +62,9 @@ class BatchTests(unittest.TestCase):
         report = load_report(self.output)
         self.assertEqual(len(report.manifest["sources"]), 9)
         self.assertEqual([f["evidence"][0]["source"] for f in report.findings["findings"]], ["log-2", "log-9"])
+        resource = json.loads((self.output / 'agent-resource/report.json').read_text())
+        self.assertEqual([f['evidence'][0]['source'] for f in resource['findings']], ['log-2', 'log-9'])
+        self.assertEqual(len(resource['reporting_contracts']), 2)
         self.assertEqual([b["source_ids"] for b in report.manifest["batches"]],
                          [[f"log-{i}" for i in range(1, 9)], ["log-1", "log-9"]])
         for batch in report.manifest["batches"]:
@@ -88,6 +91,7 @@ class BatchTests(unittest.TestCase):
         self.assertEqual([b["status"] for b in manifest["batches"]], ["prepared_only", "prepared_only"])
         self.assertTrue((self.output / "collection/collection.json").exists())
         self.assertFalse((self.output / "report.md").exists())
+        self.assertFalse((self.output / 'agent-resource').exists())
         with self.assertRaisesRegex(ValueError, "no valid completed"):
             latest_report(self.root / "reports")
 
