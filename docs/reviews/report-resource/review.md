@@ -57,7 +57,7 @@ inspected source and the supplied evidence with read-only tools; it did not
 execute tests itself. No live DAQ or diagnostic-quality model evaluation was
 performed, and the review does not claim either.
 
-Draft PR: [#9](https://github.com/slac-lcls/daq-agent/pull/9), stacked on draft
-[#8](https://github.com/slac-lcls/daq-agent/pull/8). Chat/task-transfer remain
+Draft PR: [#9](https://github.com/monarin/daq-agent/pull/9), stacked on draft
+[#8](https://github.com/monarin/daq-agent/pull/8). Chat/task-transfer remain
 temporarily deprecated; UED onboarding remains proposed. No merge, deployment
 or active-environment installation is included.

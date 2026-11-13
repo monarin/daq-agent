@@ -12,8 +12,8 @@ authors = [{name = "Mona Uervirojnangkoorn"}]
 dependencies = []
 
 [project.urls]
-Repository = "https://github.com/slac-lcls/daq-agent"
-Issues = "https://github.com/slac-lcls/daq-agent/issues"
+Repository = "https://github.com/monarin/daq-agent"
+Issues = "https://github.com/monarin/daq-agent/issues"
 
 [project.scripts]
 daq-agent = "daq_agent.cli:main"

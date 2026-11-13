@@ -1,6 +1,6 @@
 # DAQ Agent
 
-Experimental assistance for LCLS DAQ and AMI operations. The first milestone is
+Personal project exploring assistance for LCLS DAQ and AMI operations. The first milestone is
 an evidence-backed TMO robustness report covering an explicit historical window,
 for review by the hutch robustness monitor and the DAQ group.
 
