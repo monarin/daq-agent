@@ -1,0 +1,36 @@
+# Non-secret hutch-wide reporting settings.
+# Settings enable historical collection, not a statement of detector health.
+# Pacific time is an assumed source timezone; verify for the selected logs.
+hutch = "ued"
+timezone = "America/Los_Angeles"
+runtime = "claude"
+model = "opus"
+claude_deployment = "lcls"
+claude_effort = "medium"
+claude_cache_ttl = "1h"
+claude = "/sdf/group/lcls/ds/dm/apps/dev/claude/bin/current"
+# No UED exclusions have been reviewed. Keep every matching condition visible.
+known_conditions = []
+
+# Shared LCLS development installation on SDF; CLI flags can override these.
+provider_config = "/sdf/group/lcls/ds/dm/apps/dev/opencode/opencode.json"
+opencode = "/sdf/group/lcls/ds/dm/apps/dev/code/.opencode/bin/opencode"
+# Expanded for the user running the command; runs are grouped by hutch and launch month.
+output_root = "~/daq/agent-logs"
+
+# Read-only shared log discovery for the report command.
+log_root = "/sdf/home/u/uedopr/daq/logs"
+
+# Temporary upstream source; branch is descriptive, execution uses the exact SHA.
+[daq_skills]
+repository = "https://github.com/slac-lcls/lcls2"
+branch = "codex/daq-skills-consolidated-evidence"
+revision = "179b2bfbe73901f394222922571a0753e7ce9a06"
+directory = "psana/psana/skills"
+skills = [
+  "psana-daq",
+  "psana-daq-logs",
+  "psana-daq-control",
+  "psana-daq-monitor",
+  "psana-configdb",
+]

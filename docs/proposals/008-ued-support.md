@@ -1,7 +1,9 @@
 # UED reporting support
 
-Status: proposed; assessment completed 2026-11-13. No UED profile or runtime
-behavior is implemented by this document.
+Status: initial profile milestone implemented 2026-11-13; detector evidence
+selection and richer upstream guidance remain proposed. See [UED settings](../workflows/ued-logs.md)
+for the implemented scope and [review scope](../reviews/ued-profile/scope.md)
+for acceptance checks. Source timezone confirmation remains open.
 
 ## Scope and findings
 
@@ -11,8 +13,7 @@ this change. A profile enables collection; detector-specific evidence selection
 and diagnostic guidance determine how useful the resulting report is.
 
 The application already validates any lowercase three-letter hutch code and
-loads profiles by name (`reporting.report_settings`). Reports and viewing already retain hutch identity. Only TMO is packaged today;
-`report_settings("ued")` currently fails with “no packaged profile”.
+loads profiles by name (`reporting.report_settings`). Reports and viewing already retain hutch identity. TMO and UED profiles are now packaged; both use the existing generic reporting path.
 
 Read-only inspection of the shared UED log tree found the existing
 `YYYY/MM/DD_HH:MM:SS_<host>:<component>.log` layout. Sampled control, TEB and
@@ -29,11 +30,11 @@ but lacks the detailed UED ePixQuad1kfps troubleshooting guidance available in
 the maintainer's personal detector skill. Interactive personal skills are not
 automatically imported into application model sessions.
 
-## Required additions
+## Implementation roadmap
 
-| Area | Proposed change |
+| Area | Change and remaining work |
 | --- | --- |
-| Hutch configuration | Add matching `config/hutches/ued.toml` and `src/daq_agent/profiles/ued.toml`, with `hutch = "ued"`, verified log root/timezone, explicit runtime settings and a reviewed exact upstream skill pin. Keep deployment-private settings in an external config when necessary. |
+| Hutch configuration | Add matching `config/hutches/ued.toml` and `src/daq_agent/profiles/ued.toml`, with `hutch = "ued"`, accessible log root and verified timezone, explicit runtime settings and a reviewed exact upstream skill pin. Keep deployment-private settings in an external config when necessary. |
 | Default exclusions | Start with `known_conditions = []`. Review applicability before enabling any TMO exclusions; detector damage and calibration failures must remain visible. |
 | CLI and documentation | Update the TMO-only help in `cli.py`, README, config guide and reporting walkthrough. Document UED report/view and resource commands and source-access requirements. |
 | Evidence selection | Extend `collectors/session_logs.py` patterns and context selection for UED failure signatures, with synthetic positive and negative cases. |
@@ -79,7 +80,7 @@ relevant guidance using its own context management.
 
 ## Implementation and acceptance order
 
-1. Add the two UED profiles and user documentation, reusing the current runtime
+1. Initial settings implemented: two UED profiles and user documentation reuse the current runtime
    and pinned general skill integration. Verify log access as the actual runtime
    account and verify the filename/line timezone assumption. Keep missing
    coverage explicit. Basic reporting can ship separately from richer diagnosis.

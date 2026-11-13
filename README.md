@@ -4,8 +4,8 @@ Personal project exploring assistance for LCLS DAQ and AMI operations. The first
 an evidence-backed TMO robustness report covering an explicit historical window,
 for review by the hutch robustness monitor and the DAQ group.
 
-**Status: runnable reporting prototype.** `report` collects recent shared TMO
-logs and runs Claude Code (the TMO default) or OpenCode with pinned DAQ skills to produce one report for the
+**Status: runnable reporting prototype.** `report` collects recent shared TMO or UED
+logs and runs Claude Code (the packaged default) or OpenCode with pinned DAQ skills to produce one report for the
 hutch and time window. Optional `report --log` accepts supplied excerpts.
 Reports contain cited findings, Markdown, HTML, and a portable agent resource.
 New reports also show generation
@@ -88,6 +88,26 @@ time assumptions and override options.
 Platform values remain source metadata and do not split reports. The earlier
 `analyze-logs` subcommand is replaced by optional `report --log` input selection;
 the normal command above collects logs automatically.
+
+## Prepare UED evidence
+
+The installed UED profile uses the shared UED log tree, the same pinned general
+DAQ guidance and LCLS Claude settings as TMO, and **no known-condition exclusions**.
+Start with a bounded preparation run on SDF:
+
+```bash
+daq-agent report --hutch ued --last 1h --prepare-only
+```
+
+This retains evidence and skills without calling a model or producing a completed
+report. Pacific time is an assumed source timezone; verify it for the selected
+logs or supply an external `--config` with the correct timezone. Detector-specific
+pattern selection and richer UED guidance remain follow-up work, so collection
+success does not establish diagnostic quality or detector health.
+
+For model-backed reporting, omit `--prepare-only`; completed reports provide
+Markdown/HTML and `agent-resource/report.json`. Use `daq-agent view --hutch ued`
+to view the latest completed UED report. See the [UED settings and limitations](docs/workflows/ued-logs.md).
 
 ## Run the example workflow
 
@@ -199,7 +219,7 @@ Only reviewed synthetic or sanitized fixtures belong in `evals/`.
 - [Documentation index](docs/README.md)
 - [Software architecture](docs/architecture.md)
 - [Runnable log-analysis workflow](docs/workflows/log-analysis.md)
-- [One-command TMO reports](docs/workflows/rolling-report.md)
+- [One-command hutch reports](docs/workflows/rolling-report.md)
 - [Real TMO log analysis](docs/workflows/tmo-logs.md)
 - [Viewing reports](docs/viewing-reports.md)
 - [Agent report resources](docs/workflows/report-resource.md)

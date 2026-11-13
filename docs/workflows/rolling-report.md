@@ -7,7 +7,8 @@ configured model runtime, and model provider credentials:
 daq-agent report --hutch tmo --last 2d
 ```
 
-Add `--runtime claude` to use Claude Code with your personal API configuration.
+TMO and UED profiles default to shared LCLS Claude. Runtime and deployment
+overrides are available.
 The same collection, batching and citation checks apply. See
 [model runtimes](model-runtimes.md) for credentials, model aliases and defaults.
 
@@ -20,9 +21,11 @@ platform headers do not exclude a log.
 calendar dates, use `--from 2026-09-19 --to 2026-09-21` instead. Dates use the hutch
 timezone; timestamps require an explicit offset. The end is exclusive.
 
-The installed TMO profile works from any directory. It selects shared LCLS
-OpenCode/provider paths, the pinned `psana-daq` and `psana-daq-logs` skills, and
-`/sdf/home/t/tmoopr/daq/logs`. The command verifies the cached skill revision or
+The installed TMO and UED profiles work from any directory. They select shared
+LCLS runtime paths and the same five pinned general DAQ skills. TMO reads
+`/sdf/home/t/tmoopr/daq/logs`; UED reads `/sdf/home/u/uedopr/daq/logs`. UED enables
+no known-condition exclusions; see [UED settings](ued-logs.md) for timezone and
+diagnostic limitations. The command verifies the cached skill revision or
 fetches that exact SHA if absent. It never follows a branch tip.
 
 ## One public reporting command
@@ -95,7 +98,7 @@ are recorded as limitations, not treated as healthy operation.
 ## Output and viewing
 
 The command prints a new private directory under
-`~/daq/agent-logs/tmo/YYYY/MM/<unique-run>-report/`:
+`~/daq/agent-logs/<hutch>/YYYY/MM/<unique-run>-report/`:
 
 ```text
 manifest.json                 # hutch/window scope, provenance, status

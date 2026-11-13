@@ -148,15 +148,17 @@ class SkillSourceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unexpected"):
             audit_evidence_access(events, workspace, sources, names)
 
-    def test_tmo_config_has_exact_pin(self):
-        settings = load_settings(Path("config/hutches/tmo.toml"))
-        self.assertEqual(settings.daq_skills.revision, "179b2bfbe73901f394222922571a0753e7ce9a06")
-        self.assertEqual(settings.daq_skills.skills, ('psana-daq', 'psana-daq-logs', 'psana-daq-control', 'psana-daq-monitor', 'psana-configdb'))
+    def test_hutch_configs_have_exact_pin(self):
         from importlib.resources import files
         from daq_agent.skill_sources import descriptor
         import tomllib
-        packaged = tomllib.loads(files("daq_agent").joinpath("profiles/tmo.toml").read_text())
-        self.assertEqual(descriptor(settings.daq_skills), packaged["daq_skills"])
+        for hutch in ("tmo", "ued"):
+            with self.subTest(hutch=hutch):
+                settings = load_settings(Path(f"config/hutches/{hutch}.toml"))
+                self.assertEqual(settings.daq_skills.revision, "179b2bfbe73901f394222922571a0753e7ce9a06")
+                self.assertEqual(settings.daq_skills.skills, ('psana-daq', 'psana-daq-logs', 'psana-daq-control', 'psana-daq-monitor', 'psana-configdb'))
+                packaged = tomllib.loads(files("daq_agent").joinpath(f"profiles/{hutch}.toml").read_text())
+                self.assertEqual(descriptor(settings.daq_skills), packaged["daq_skills"])
 
     def test_composed_suite_retains_overview_references_and_chat(self):
         self.check_composed_suite(legacy=True)
