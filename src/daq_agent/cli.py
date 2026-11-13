@@ -40,7 +40,7 @@ def main(argv: list[str] | None = None) -> int:
     plan.add_argument("--from", dest="start", required=True, help="inclusive date or offset timestamp")
     plan.add_argument("--to", dest="end", required=True, help="exclusive date or offset timestamp")
     report = commands.add_parser("report", help="generate one report for a hutch and time window")
-    report.add_argument("--hutch", required=True, help="hutch profile (currently tmo is packaged)")
+    report.add_argument("--hutch", required=True, help="hutch profile (tmo and ued are packaged)")
     report.add_argument("--config", type=Path, help="override the packaged hutch profile")
     report.add_argument("--last", help="rolling elapsed window, e.g. 2d or 48h; maximum 7d")
     report.add_argument("--from", dest="start", help="alternative explicit inclusive boundary")

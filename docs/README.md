@@ -9,6 +9,7 @@ proposals, implementation plans, and project decisions.
 | [Log-analysis workflow](workflows/log-analysis.md) | Python + skill + example + validation walkthrough | Implemented prototype |
 | [One-command reporting](workflows/rolling-report.md) | Collect shared logs and produce one hutch/window report | Implemented prototype |
 | [Known conditions](workflows/known-conditions.md) | Deterministic counts and exclusions before model analysis | Implemented; enabled for TMO |
+| [UED settings](workflows/ued-logs.md) | Profile, read-only preparation and diagnostic limitations | Initial settings implemented |
 | [Real TMO logs](workflows/tmo-logs.md) | Scoped input preparation and pinned-skill analysis | Manual workflow |
 | [Viewing reports](viewing-reports.md) | Browser reports, clickable evidence, NoMachine/SSH, and personal settings | Implemented |
 | [Skills integration](skills-integration.md) | Pinned source, explicit synchronization, runtime loading | Implemented for supplied and collected excerpts |
@@ -25,7 +26,7 @@ proposals, implementation plans, and project decisions.
 | [Report comparison baseline](evaluation/report-baseline.md) | Fixed synthetic cases, semantic rubric and retained runtime comparison | Baseline established; broader model evaluation pending |
 | [Post-merge workflow check](evaluation/post-merge-workflow-check.md) | Saved report links, known-condition evidence and transfer verification | Local checks passed 2026-10-20 |
 | [Standalone report investigations](proposals/007-standalone-report-investigation.md) | Independent central Claude/Codex sessions with report and personal skills | Proposed; not implemented |
-| [UED support](proposals/008-ued-support.md) | Hutch profile, detector evidence selection, upstream guidance and acceptance checks | Proposed; not implemented |
+| [UED support](proposals/008-ued-support.md) | Hutch profile, detector evidence selection, upstream guidance and acceptance checks | Initial settings implemented; detector guidance proposed |
 | [Deployment](deployment.md) | Development, service installation, state, credentials | Proposed deployment |
 
 Current choices: a standalone Python repository; centralized Claude for TMO

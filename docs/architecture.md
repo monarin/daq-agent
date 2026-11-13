@@ -8,7 +8,7 @@ The same investigation should eventually be callable from a scheduled report,
 an operator conversation, or a live incident trigger.
 
 The implementation validates configuration/time windows, collects recent shared
-TMO launch logs, and analyzes bounded counts/excerpts through the configured Claude/OpenCode runtime. It also
+TMO or UED launch logs, and analyzes bounded counts/excerpts through the configured Claude/OpenCode runtime. It also
 accepts explicitly supplied excerpts through `report --log`. One hutch/window
 gets one draft with pinned upstream DAQ guidance, validated citation locations,
 and retained evidence. Larger evidence sets use multiple bounded sessions; Python

@@ -238,19 +238,60 @@ class ReportingTests(unittest.TestCase):
 
     def test_packaged_profile_cli_prepares_without_credentials_or_checkout(self):
         self.log()
-        output = self.root / "report"
-        stream = io.StringIO()
-        with redirect_stdout(stream):
-            code = main(["report", "--hutch", "tmo", "--from", "2026-08-31", "--to", "2026-09-03",
-                         "--log-root", str(self.logs), "--output", str(output),
-                         "--prepare-only", "--local-skills-only"])
-        self.assertEqual(code, 0)
-        self.assertEqual(json.loads(stream.getvalue())["status"], "prepared_only")
+        repository = Path(__file__).resolve().parents[1]
+        for hutch in ("tmo", "ued"):
+            with self.subTest(hutch=hutch):
+                output = self.root / hutch
+                stream = io.StringIO()
+                with redirect_stdout(stream):
+                    code = main(["report", "--hutch", hutch, "--from", "2026-08-31", "--to", "2026-09-03",
+                                 "--log-root", str(self.logs), "--output", str(output),
+                                 "--prepare-only", "--local-skills-only"])
+                self.assertEqual(code, 0)
+                self.assertEqual(json.loads(stream.getvalue())["status"], "prepared_only")
+                manifest = json.loads((output / "manifest.json").read_text())
+                self.assertEqual(manifest["settings"]["hutch"], hutch)
+                self.assertEqual((repository / f"src/daq_agent/profiles/{hutch}.toml").read_text(),
+                                 (repository / f"config/hutches/{hutch}.toml").read_text())
         with self.assertRaisesRegex(ValueError, "no packaged profile"):
             report_settings("rix")
-        repository = Path(__file__).resolve().parents[1]
-        self.assertEqual((repository / "src/daq_agent/profiles/tmo.toml").read_text(),
-                         (repository / "config/hutches/tmo.toml").read_text())
+
+    def test_ued_profile_keeps_conditions_and_prepares_all_platforms_without_model(self):
+        self.log(body="double free or corruption (out)\n")
+        self.log("2026/09/02_00:00:00_node:epixquad1kfps_0.log", partition=6)
+        settings = replace(report_settings("ued"), log_root=str(self.logs))
+        self.assertEqual(settings.known_conditions, ())
+        self.assertEqual(settings.runtime, "claude")
+        self.assertEqual(settings.claude_deployment, "lcls")
+        self.assertEqual(settings.timezone, "America/Los_Angeles")
+        output = self.root / "ued-prepared"
+        with patch("daq_agent.claude_runtime.run_claude", side_effect=AssertionError("model called")), \
+             patch("daq_agent.log_analysis.run_opencode", side_effect=AssertionError("model called")):
+            result = generate_report(settings, self.start, self.end, output,
+                                     prepare_only=True, local_skills_only=True)
+        self.assertEqual(result["status"], "prepared_only")
+        collection = json.loads((output / "collection/collection.json").read_text())
+        self.assertEqual({r["partition"] for r in collection["files"]}, {0, 6})
+        evidence = "\n".join(p.read_text() for p in (output / "evidence").glob("*.txt"))
+        self.assertIn("double free or corruption", evidence)
+        self.assertNotIn("Known-condition line omitted", evidence)
+        self.assertFalse((output / "report.md").exists())
+        self.assertFalse((output / "agent-resource").exists())
+
+    def test_completed_ued_resource_and_view_stay_separate_from_tmo(self):
+        self.log()
+        settings = self.fake_settings()
+        for hutch in ("ued", "tmo"):
+            output = self.root / f"reports/{hutch}/2026/09/example-report"
+            result = generate_report(replace(settings, hutch=hutch), self.start, self.end, output)
+            self.assertEqual(result["status"], "completed")
+            resource = json.loads((output / "agent-resource/report.json").read_text())
+            self.assertEqual(resource["hutch"], hutch)
+            self.assertTrue((output / "report.md").is_file())
+            self.assertTrue((output / "report.html").is_file())
+        for hutch in ("ued", "tmo"):
+            self.assertEqual(latest_report(self.root / "reports", hutch).directory,
+                             self.root / f"reports/{hutch}/2026/09/example-report")
 
     def test_cli_has_one_reporting_command_and_no_partition_filter(self):
         stream = io.StringIO()
