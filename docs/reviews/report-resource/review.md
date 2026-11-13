@@ -32,4 +32,32 @@ evidence directly instead of requiring reads outside the checkout.
 - The active installed environment was not changed. Early missing-build-frontend
   and stale-install test attempts were superseded by the isolated passing checks.
 
-No approval is claimed until re-review of the corrected implementation completes.
+## Round 2 — passed
+
+Reviewed code commit: `a8ee218f2f68612704a371abc3ae07a448a37d56`.
+Verdict: **pass**, zero remaining findings. The reviewer confirmed R1–R5 were
+resolved and found no regressions. No third round was needed. This section is a
+subsequent evidence-only update; it does not change the reviewed implementation.
+
+Validation on the corrected commit:
+
+- Python 3.13 source suite: 172 tests, OK, one opt-in skip.
+- Fresh sdist and wheel built from a detached checkout; wheel installed into an
+  isolated environment without source-path overrides.
+- Full installed-wheel suite with the opt-in OpenCode check enabled: **172 tests,
+  OK, no skips**. The OpenCode check uses synthetic tools without model/API calls.
+- Installed CLI export outside the checkout passed; packaged profile/reporting
+  skill and all five synthetic bundle artifact hashes were verified.
+- `git diff --check` passed; active installed environment unchanged.
+
+The second review context embedded the prior findings, fix diff, complete
+installed-wheel test output, build/install evidence and package smoke result.
+This resolved the first round's unavailable external-artifact reads. Claude
+inspected source and the supplied evidence with read-only tools; it did not
+execute tests itself. No live DAQ or diagnostic-quality model evaluation was
+performed, and the review does not claim either.
+
+Draft PR: [#9](https://github.com/slac-lcls/daq-agent/pull/9), stacked on draft
+[#8](https://github.com/slac-lcls/daq-agent/pull/8). Chat/task-transfer remain
+temporarily deprecated; UED onboarding remains proposed. No merge, deployment
+or active-environment installation is included.
