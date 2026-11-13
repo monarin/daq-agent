@@ -138,6 +138,32 @@ class UEDEvidenceTests(unittest.TestCase):
         control = next(r for r in metadata['files'] if r['headers']['ID'] == 'control')
         self.assertEqual(control['matches']['error|untimed_or_unparsed'], 100)
 
+    def test_varying_pids_and_counters_do_not_consume_subframe_slots(self):
+        repeated = [f'process[{10000+i}] counter={123456+i} Missing data: subframe[2] size 16000'
+                    for i in range(5)]
+        distinct = ['Missing data: subframe[0] size 0', 'Missing data: subframe[2] size 0',
+                    'Missing data: subframe[2] size 32000']
+        self.log('epixquad1kfps_0', ('\n' + 'normal context\n' * 6).join(repeated + distinct))
+        docs, metadata = self.collect()
+        examples = docs[1].split('REPRESENTATIVE CONTEXT WITH ORIGINAL LINE NUMBERS:')[1]
+        self.assertEqual(examples.count('EXAMPLE category=detector_subframe'), 4)
+        for message in distinct:
+            self.assertIn(message, examples)
+        self.assertIn('5 | untimed_or_unparsed | process[PID] counter=N Missing data: subframe[2] size 16000', docs[1])
+        self.assertEqual(metadata['files'][0]['matches']['detector_subframe|untimed_or_unparsed'], 8)
+
+    def test_numeric_and_hex_hash_pairs_remain_distinct_without_pid_noise(self):
+        hashes = [('1234567', '7654321'), ('2345678', '8765432'), ('0xabc', '0xdef'), ('0xaaa', '0xbbb')]
+        messages = [f'AxiVersion.GitHash = {a} != Calibration Githash = {b}' for a, b in hashes]
+        repeated = [f'process[{10000+i}] counter={123456+i} {messages[0]}' for i in range(5)]
+        self.log('epixquad1kfps_0', ('\n' + 'normal context\n' * 6).join(repeated + messages[1:]))
+        docs, _ = self.collect()
+        examples = docs[1].split('REPRESENTATIVE CONTEXT WITH ORIGINAL LINE NUMBERS:')[1]
+        self.assertEqual(examples.count('EXAMPLE category=adc_calibration'), 4)
+        for message in messages:
+            self.assertIn(message, examples)
+        self.assertIn(f'5 | untimed_or_unparsed | process[PID] counter=N {messages[0]}', docs[1])
+
     def test_generic_signatures_also_work_for_tmo(self):
         self.log('epixquad', 'Missing data: subframe[2] size 1600')
         docs, metadata = self.collect('tmo')

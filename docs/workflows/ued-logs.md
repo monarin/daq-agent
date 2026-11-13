@@ -57,8 +57,9 @@ AsicMask assignments, equal hash messages and ordinary subframe size logs do not
 trigger these categories. Existing generic patterns still apply.
 
 Detector categories receive representative context before broader errors within
-the existing document budget. Subframe indices and numeric sizes remain distinct
-for sampling. At most four distinct signatures per category/time bucket are
+the existing document budget. Subframe indices, sizes/counts and calibration
+hash values remain distinct for sampling; unrelated PIDs and long counters are
+still normalized to group repeated messages. At most four distinct signatures per category/time bucket are
 retained; additional matches remain in counts. Context includes two preceding
 and three following lines; existing traceback capture retains up to 64 lines.
 Nearby timing, frame and setup messages can therefore remain context without

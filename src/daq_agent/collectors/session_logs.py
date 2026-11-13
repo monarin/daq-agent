@@ -51,12 +51,31 @@ COMPILED = {name: re.compile(pattern, re.I) for name, pattern in PATTERNS.items(
 PRIORITY = list(PATTERNS)
 PRIORITY.insert(PRIORITY.index("pv_read") + 1, "slow_link_config")
 SENSITIVE = re.compile(r"(?:CONFIGDB_AUTH|Authorization|password|secret|access_token|api_key|bearer)\s*[:=]|https?://[^/\s]+:[^/\s]+@|eyJ[A-Za-z0-9_-]{20,}\.", re.I)
+NORMALIZED_VALUE = re.compile(r"0x[0-9a-fA-F]+|\[\d+\]|\b\d{5,}\b")
+SIGNIFICANT_VALUES = {
+    "detector_subframe": re.compile(r"\bsubframe\[\d+\]|\b(?:size|count)\s+\d+\b|\[expected\s+\d+\]", re.I),
+    "adc_calibration": re.compile(r"\b(?:AxiVersion\.GitHash|Calibration\s+Githash)\s*=\s*\S+", re.I),
+}
 
 
 def safe(line: str) -> str:
     if SENSITIVE.search(line):
         return "[REDACTED sensitive field]"
     return line[:650] + (" [LINE CLIPPED]" if len(line) > 650 else "")
+
+
+def normalized_message(line, categories):
+    text = STAMP.sub("", safe(line)).strip()
+    # Preserve detector values, but still coalesce unrelated PIDs/counters.
+    protected = [match.span() for category in categories if category in SIGNIFICANT_VALUES
+                 for match in SIGNIFICANT_VALUES[category].finditer(text)]
+
+    def replace_value(match):
+        if any(start <= match.start() and match.end() <= end for start, end in protected):
+            return match[0]
+        return "0xADDR" if match[0].startswith("0x") else "[PID]" if match[0].startswith("[") else "N"
+
+    return NORMALIZED_VALUE.sub(replace_value, text)[:240]
 
 
 def time_bucket(line, start, end, zone):
@@ -198,12 +217,7 @@ def collect_logs(root: Path, target: Path, hutch: str, start, end, timezone_name
                     counts[(category, bucket)] += 1
                 if i in excluded:
                     continue
-                normalized = STAMP.sub("", safe(line)).strip()
-                normalized = re.sub(r"0x[0-9a-fA-F]+", "0xADDR", normalized)
-                if "detector_subframe" not in categories:
-                    normalized = re.sub(r"\[\d+\]", "[PID]", normalized)
-                    normalized = re.sub(r"\b\d{5,}\b", "N", normalized)
-                normalized = normalized[:240]
+                normalized = normalized_message(line, categories)
                 group["patterns"][(bucket, normalized)] += 1
                 for category in categories:
                     analysis_counts[(category, bucket)] += 1
